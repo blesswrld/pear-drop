@@ -47,6 +47,10 @@ export const usePeer = () => {
 
             // Срабатывает при входящем соединении от другого пира
             newPeer.on("connection", (connection) => {
+                // --- Немедленно очищаем старые слушатели ---
+                if (connRef.current) {
+                    connRef.current.removeAllListeners();
+                }
                 connRef.current = connection;
                 setupConnectionEvents(connection);
             });
@@ -67,15 +71,17 @@ export const usePeer = () => {
 
     // 2. Настройка обработчиков для соединения
     const setupConnectionEvents = (conn: DataConnection) => {
+        conn.removeAllListeners();
+
         conn.on("open", () => {
             setIsConnected(true);
             toast.success("Соединение установлено!");
         });
 
         conn.on("close", () => {
-            toast.error("Другой пользователь отключился.");
+            toast.error("Соединение разорвано.");
             setIsConnected(false);
-            setStatusMessage("Соединение разорвано.");
+            setStatusMessage("Готов к работе. Поделитесь ID.");
         });
 
         let receivedChunks: ArrayBuffer[] = [];
@@ -118,6 +124,11 @@ export const usePeer = () => {
     const connectToPeer = () => {
         if (!peerRef.current || !remotePeerId) return;
         setStatusMessage(`Подключение к ${remotePeerId}...`);
+
+        // --- Немедленно очищаем старые слушатели ---
+        if (connRef.current) {
+            connRef.current.removeAllListeners();
+        }
 
         const conn = peerRef.current.connect(remotePeerId);
         connRef.current = conn;
