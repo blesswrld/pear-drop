@@ -5,6 +5,7 @@ import { FileTransfer } from "./components/FileTransfer";
 import { ConfirmationModal } from "./components/ConfirmationModal"; // <-- Импорт модалки
 import { Button } from "@nextui-org/button";
 import { ArrowLeft } from "lucide-react";
+import { SupportedFormats } from "./components/SupportedFormats"; // <-- Импортируем компонент
 import { AnimatePresence, motion } from "framer-motion";
 
 /**
@@ -80,6 +81,10 @@ function App() {
                     </motion.div>
                 </AnimatePresence>
             </main>
+
+            {/* --- КОМПОНЕНТ SUPPORTEDFORMATS --- */}
+            {/* Показываем его только до установки соединения */}
+            {!peerProps.isConnected && <SupportedFormats />}
 
             {/* --- МОДАЛЬНОЕ ОКНО --- */}
             <ConfirmationModal
