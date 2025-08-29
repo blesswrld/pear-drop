@@ -79,9 +79,9 @@ export const FileTransfer = ({
 
     return (
         <>
-            <Card className="max-w-md w-full bg-content1/70 backdrop-blur-md -mt-14">
-                <CardHeader className="flex-col items-start px-6 pt-6">
-                    <h2 className="text-2xl font-bold text-success">
+            <Card className="max-w-md w-full bg-content1/70 backdrop-blur-md">
+                <CardHeader className="flex-col items-center text-center px-6 pt-6">
+                    <h2 className="text-2xl font-bold text-success mb-1">
                         Соединение установлено!
                     </h2>
                     <p className="text-small text-default-500">
