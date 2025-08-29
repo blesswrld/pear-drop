@@ -32,56 +32,71 @@ export const usePeer = () => {
     const peerRef = useRef<Peer | null>(null);
     const connRef = useRef<DataConnection | null>(null);
 
-    // Эффект для инициализации PeerJS и подписки на основные события. Выполняется один раз.
+    // 1. Инициализация PeerJS при первом рендере
     useEffect(() => {
-        const newPeer = new Peer();
-        peerRef.current = newPeer;
+        // Динамический импорт решает проблемы с React Strict Mode
+        import("peerjs").then(({ default: Peer }) => {
+            const newPeer = new Peer();
+            peerRef.current = newPeer;
 
-        // Срабатывает при успешном подключении к сигнальному серверу PeerJS
-        newPeer.on("open", (id) => {
-            setPeerId(id);
-            setStatusMessage("Готов к работе. Поделитесь ID.");
-        });
+            // Срабатывает при успешном подключении к сигнальному серверу PeerJS
+            newPeer.on("open", (id) => {
+                setPeerId(id);
+                setStatusMessage("Готов к работе. Поделитесь ID.");
+            });
 
-        // Срабатывает при входящем соединении от другого пира
-        newPeer.on("connection", (connection) => {
-            connRef.current = connection;
-            setupConnectionEvents();
+            // Срабатывает при входящем соединении от другого пира
+            newPeer.on("connection", (connection) => {
+                connRef.current = connection;
+                setupConnectionEvents(connection);
+            });
+
+            newPeer.on("error", (err) => {
+                console.error("PeerJS Error:", err);
+                if (err.type === "peer-unavailable") {
+                    setStatusMessage("Пользователь с таким ID не найден.");
+                }
+            });
         });
 
         // Очистка при размонтировании компонента
         return () => {
-            newPeer.destroy();
+            peerRef.current?.destroy();
         };
     }, []);
 
-    // Настраивает обработчики событий для установленного DataConnection
-    const setupConnectionEvents = () => {
-        if (!connRef.current) return;
-
-        connRef.current.on("open", () => {
+    // 2. Настройка обработчиков для соединения
+    const setupConnectionEvents = (conn: DataConnection) => {
+        conn.on("open", () => {
             setIsConnected(true);
             toast.success("Соединение установлено!");
+        });
+
+        conn.on("close", () => {
+            toast.error("Другой пользователь отключился.");
+            setIsConnected(false);
+            setStatusMessage("Соединение разорвано.");
         });
 
         let receivedChunks: ArrayBuffer[] = [];
         let metadata: Metadata | null = null;
 
-        // Обработка входящих данных (метаданные или чанки файла)
+        // Обработка входящих данных
         // @ts-ignore
-        connRef.current.on("data", (data: any) => {
+        conn.on("data", (data: any) => {
             if (data.type === "metadata") {
                 metadata = data;
                 receivedChunks = [];
                 setProgress(0);
+                // @ts-ignore
                 setStatusMessage(`Получение файла: ${metadata.name}`);
             } else {
                 receivedChunks.push(data);
-                const receivedSize = receivedChunks.reduce(
-                    (acc, chunk) => acc + chunk.byteLength,
-                    0
-                );
                 if (metadata) {
+                    const receivedSize = receivedChunks.reduce(
+                        (acc, chunk) => acc + chunk.byteLength,
+                        0
+                    );
                     setProgress(
                         Math.round((receivedSize / metadata.size) * 100)
                     );
@@ -99,13 +114,19 @@ export const usePeer = () => {
         });
     };
 
-    // Инициирует соединение с удаленным пиром по его ID
+    // 3. Функция подключения к другому пиру
     const connectToPeer = () => {
         if (!peerRef.current || !remotePeerId) return;
         setStatusMessage(`Подключение к ${remotePeerId}...`);
 
-        connRef.current = peerRef.current.connect(remotePeerId);
-        setupConnectionEvents();
+        const conn = peerRef.current.connect(remotePeerId);
+        connRef.current = conn;
+        setupConnectionEvents(conn);
+    };
+
+    // --- функция для разрыва соединения ---
+    const disconnectPeer = () => {
+        connRef.current?.close();
     };
 
     // Возвращаем все необходимые данные и функции для использования в UI
@@ -120,5 +141,6 @@ export const usePeer = () => {
         progress,
         connectToPeer,
         connRef, // Отдаем ref для отправки файла
+        onDisconnect: disconnectPeer,
     };
 };

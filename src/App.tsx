@@ -1,6 +1,10 @@
+import { useState } from "react"; // <-- Добавляем useState
 import { usePeer } from "./hooks/usePeer";
 import { ConnectionSetup } from "./components/ConnectionSetup";
 import { FileTransfer } from "./components/FileTransfer";
+import { ConfirmationModal } from "./components/ConfirmationModal"; // <-- Импорт модалки
+import { Button } from "@nextui-org/button";
+import { ArrowLeft } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 
 /**
@@ -9,10 +13,38 @@ import { AnimatePresence, motion } from "framer-motion";
  * в зависимости от состояния соединения.
  */
 function App() {
-    const { isConnected, ...peerProps } = usePeer();
+    const peerProps = usePeer();
+    const [isConfirmModalOpen, setConfirmModalOpen] = useState(false); // <-- Состояние модалки
+
+    const handleConfirmDisconnect = () => {
+        peerProps.onDisconnect();
+        setConfirmModalOpen(false);
+    };
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center p-4">
+        <div className="min-h-screen flex flex-col items-center justify-center p-4 relative">
+            {/* --- КНОПКА "НАЗАД" --- */}
+            {/* Появляется только когда соединение установлено */}
+            <AnimatePresence>
+                {peerProps.isConnected && (
+                    <motion.div
+                        className="absolute top-6 left-6"
+                        initial={{ opacity: 0, scale: 0.5 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.5 }}
+                    >
+                        <Button
+                            isIconOnly
+                            variant="light"
+                            onPress={() => setConfirmModalOpen(true)}
+                            aria-label="Вернуться"
+                        >
+                            <ArrowLeft className="h-5 w-5 text-default-500" />
+                        </Button>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             <header className="text-center mb-12">
                 <motion.h1
                     initial={{ opacity: 0, y: -20 }}
@@ -34,14 +66,13 @@ function App() {
             <main className="w-full max-w-md">
                 <AnimatePresence mode="wait">
                     <motion.div
-                        key={isConnected ? "transfer" : "setup"}
+                        key={peerProps.isConnected ? "transfer" : "setup"}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
                         transition={{ duration: 0.3 }}
                     >
-                        {/* Условный рендер */}
-                        {isConnected ? (
+                        {peerProps.isConnected ? (
                             <FileTransfer {...peerProps} />
                         ) : (
                             <ConnectionSetup {...peerProps} />
@@ -49,6 +80,13 @@ function App() {
                     </motion.div>
                 </AnimatePresence>
             </main>
+
+            {/* --- МОДАЛЬНОЕ ОКНО --- */}
+            <ConfirmationModal
+                isOpen={isConfirmModalOpen}
+                onClose={() => setConfirmModalOpen(false)}
+                onConfirm={handleConfirmDisconnect}
+            />
         </div>
     );
 }
