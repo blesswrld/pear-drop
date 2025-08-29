@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import Peer from "peerjs";
+import toast from "react-hot-toast";
 
 // @ts-ignore
 type DataConnection = any;
@@ -60,7 +61,7 @@ export const usePeer = () => {
 
         connRef.current.on("open", () => {
             setIsConnected(true);
-            setStatusMessage("Соединение установлено!");
+            toast.success("Соединение установлено!");
         });
 
         let receivedChunks: ArrayBuffer[] = [];
@@ -89,8 +90,8 @@ export const usePeer = () => {
                             type: metadata.fileType,
                         });
                         const url = URL.createObjectURL(fileBlob);
+                        toast.success(`Файл "${metadata.name}" получен!`);
                         setReceivedFile({ url, name: metadata.name });
-                        setStatusMessage(`Файл "${metadata.name}" получен!`);
                         setProgress(0);
                     }
                 }

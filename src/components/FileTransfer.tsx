@@ -1,4 +1,8 @@
 import { useRef, useState } from "react";
+import { Card, CardBody, CardHeader } from "@nextui-org/card";
+import { Button } from "@nextui-org/button";
+import { Progress } from "@nextui-org/progress";
+import { UploadCloud, DownloadCloud } from "lucide-react"; // Иконки
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100 MB
 
@@ -65,48 +69,65 @@ export const FileTransfer = ({
     };
 
     return (
-        <div className="text-center space-y-4">
-            <p className="text-lg text-emerald-400 font-bold">
-                {statusMessage}
-            </p>
-            {progress > 0 && progress < 100 && (
-                <div className="w-full bg-slate-700 rounded-full h-2.5">
-                    <div
-                        className="bg-sky-500 h-2.5 rounded-full"
-                        style={{ width: `${progress}%` }}
-                    ></div>
-                </div>
-            )}
-            {/* Скрытый input[type=file] для выбора файла */}
-            <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleFileChange}
-                className="hidden"
-            />
-            <button
-                onClick={() => fileInputRef.current?.click()}
-                className="w-full bg-slate-600 hover:bg-slate-500 text-white font-bold py-3 px-4 rounded-lg"
-            >
-                {file ? `Выбран: ${file.name}` : "Выбрать файл"}
-            </button>
-            <button
-                onClick={sendFile}
-                disabled={!file || progress > 0}
-                className="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-4 rounded-lg disabled:bg-slate-700 disabled:cursor-not-allowed"
-            >
-                Отправить
-            </button>
-            {receivedFile && (
-                <div className="pt-4 border-t border-slate-700">
-                    <button
-                        onClick={downloadFile}
-                        className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-4 rounded-lg"
+        <Card className="max-w-md w-full bg-content1/70 backdrop-blur-md">
+            <CardHeader className="flex-col items-start px-6 pt-6">
+                <h2 className="text-2xl font-bold text-success">
+                    Соединение установлено!
+                </h2>
+                <p className="text-small text-default-500">{statusMessage}</p>
+            </CardHeader>
+            <CardBody className="p-6">
+                <div className="space-y-4">
+                    {progress > 0 && (
+                        <Progress
+                            aria-label="Загрузка..."
+                            size="sm"
+                            value={progress}
+                            color="primary"
+                            showValueLabel={true}
+                            className="max-w-md"
+                        />
+                    )}
+
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleFileChange}
+                        className="hidden"
+                    />
+
+                    <Button
+                        variant="bordered"
+                        onPress={() => fileInputRef.current?.click()}
+                        className="w-full"
                     >
-                        Скачать "{receivedFile.name}"
-                    </button>
+                        <UploadCloud className="mr-2 h-4 w-4" />
+                        {file ? file.name : "Выбрать файл"}
+                    </Button>
+
+                    <Button
+                        color="primary"
+                        onPress={sendFile}
+                        disabled={!file || progress > 0}
+                        className="w-full font-bold"
+                    >
+                        Отправить
+                    </Button>
+
+                    {receivedFile && (
+                        <div className="pt-4 border-t border-default-200">
+                            <Button
+                                onPress={downloadFile}
+                                color="success"
+                                className="w-full font-bold text-white"
+                            >
+                                <DownloadCloud className="mr-2 h-4 w-4" />
+                                Скачать "{receivedFile.name}"
+                            </Button>
+                        </div>
+                    )}
                 </div>
-            )}
-        </div>
+            </CardBody>
+        </Card>
     );
 };
