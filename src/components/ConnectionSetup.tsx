@@ -10,10 +10,6 @@ interface ConnectionSetupProps {
     connectToPeer: () => void;
 }
 
-/**
- * Компонент, отвечающий за UI до установки P2P-соединения.
- * Отображает ID пользователя и форму для подключения к другому пиру.
- */
 export const ConnectionSetup = ({
     peerId,
     statusMessage,

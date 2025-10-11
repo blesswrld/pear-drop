@@ -17,10 +17,6 @@ interface FileTransferProps {
     onDisconnect: () => void;
 }
 
-/**
- * Компонент, отвечающий за UI в состоянии установленного P2P-соединения.
- * Позволяет выбирать, отправлять и скачивать файлы.
- */
 export const FileTransfer = ({
     connRef,
     statusMessage,
@@ -33,7 +29,6 @@ export const FileTransfer = ({
     const [isConfirmModalOpen, setConfirmModalOpen] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Обрабатывает выбор файла пользователем и проверяет его размер
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFile = e.target.files?.[0];
         if (selectedFile) {
@@ -46,7 +41,6 @@ export const FileTransfer = ({
         }
     };
 
-    // Отправляет сначала метаданные, а затем сам файл (как ArrayBuffer)
     const sendFile = async () => {
         if (!file || !connRef.current) return;
         connRef.current.send({
@@ -59,7 +53,6 @@ export const FileTransfer = ({
         connRef.current.send(buffer);
     };
 
-    // Создает временную ссылку и инициирует скачивание полученного файла
     const downloadFile = () => {
         if (receivedFile) {
             const a = document.createElement("a");

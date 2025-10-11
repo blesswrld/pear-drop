@@ -1,21 +1,16 @@
-import { useState } from "react"; // <-- Добавляем useState
+import { useState } from "react";
 import { usePeer } from "./hooks/usePeer";
 import { ConnectionSetup } from "./components/ConnectionSetup";
 import { FileTransfer } from "./components/FileTransfer";
-import { ConfirmationModal } from "./components/ConfirmationModal"; // <-- Импорт модалки
+import { ConfirmationModal } from "./components/ConfirmationModal";
 import { Button } from "@nextui-org/button";
 import { ArrowLeft } from "lucide-react";
-import { SupportedFormats } from "./components/SupportedFormats"; // <-- Импортируем компонент
+import { SupportedFormats } from "./components/SupportedFormats";
 import { AnimatePresence, motion } from "framer-motion";
 
-/**
- * Главный компонент приложения.
- * Собирает хук и UI-компоненты вместе, управляя отображением
- * в зависимости от состояния соединения.
- */
 function App() {
     const peerProps = usePeer();
-    const [isConfirmModalOpen, setConfirmModalOpen] = useState(false); // <-- Состояние модалки
+    const [isConfirmModalOpen, setConfirmModalOpen] = useState(false);
 
     const handleConfirmDisconnect = () => {
         peerProps.onDisconnect();
@@ -24,8 +19,6 @@ function App() {
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center p-4 relative">
-            {/* --- КНОПКА "НАЗАД" --- */}
-            {/* Появляется только когда соединение установлено */}
             <AnimatePresence>
                 {peerProps.isConnected && (
                     <motion.div
@@ -82,11 +75,8 @@ function App() {
                 </AnimatePresence>
             </main>
 
-            {/* --- КОМПОНЕНТ SUPPORTEDFORMATS --- */}
-            {/* Показываем его только до установки соединения */}
             {!peerProps.isConnected && <SupportedFormats />}
 
-            {/* --- МОДАЛЬНОЕ ОКНО --- */}
             <ConfirmationModal
                 isOpen={isConfirmModalOpen}
                 onClose={() => setConfirmModalOpen(false)}

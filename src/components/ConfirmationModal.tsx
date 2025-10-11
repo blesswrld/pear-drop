@@ -23,13 +23,11 @@ export const ConfirmationModal = ({
             isOpen={isOpen}
             onOpenChange={onClose}
             backdrop="blur"
-            // --- КЛАССЫ ДЛЯ АДАПТИВНОСТИ ---
             classNames={{
-                base: "bg-content1/70 border border-default-200 m-4 sm:m-0", // Добавляем отступы на мобильных
+                base: "bg-content1/70 border border-default-200 m-4 sm:m-0",
                 closeButton: "hover:bg-white/5 active:bg-white/10",
             }}
-            // --- СВОЙСТВО ДЛЯ РАСПОЛОЖЕНИЯ ---
-            placement="center" // Убеждаемся, что окно всегда по центру
+            placement="center"
         >
             <ModalContent>
                 {(close) => (
@@ -40,7 +38,6 @@ export const ConfirmationModal = ({
                         <ModalBody>
                             <p className="text-sm">
                                 {" "}
-                                {/* Уменьшаем шрифт на мобильных */}
                                 Вы уверены, что хотите вернуться на главный
                                 экран? Это разорвет ваше текущее соединение.
                             </p>
